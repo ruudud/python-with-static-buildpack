@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+
+build_dir=$1
+cache_dir=$2
+
+# fail fast
+set -e
+
+echo "-----> Installing nginx and Python stuff with apt-get"
+
+apt-get -y update
+apt-get -y install nginx-light python-pip
+pip install --upgrade pip
+
+
+echo "       Nginx and Python packages installed"
+
+echo "-----> Installing Python dependencies using Pip"
+
+pip install -r $build_dir/BACKEND/requirements.txt
+
+echo "       Dependencies installed"
+
+echo "-----> Adding Nginx config"
+
+cat > $build_dir/.nginx.conf <<STUFF
+daemon off;
+error_log stderr;
+worker_processes 1;
+
+events {
+    worker_connections 1024;
+}
+http {
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+    access_log /dev/stdout;
+
+    server {
+        listen 5000;
+        root "/app/FRONTEND/webapp";
+
+        location / {
+            index index.html;
+            try_files $uri $uri/ @pass_to_app;
+        }
+
+        location /api {
+            rewrite /api/(.*) /$1 break;
+            proxy_pass http://localhost:6000;
+            proxy_redirect http://localhost:6000/ /api/;
+        }
+
+        location /admin {
+            alias /app/BACKEND/sportsfronter/static;
+            try_files $uri $uri/ @pass_to_app;
+        }
+
+        location @pass_to_app {
+            proxy_pass http://localhost:6000;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header Host $http_host;
+        }
+    }
+}
+STUFF
+

@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+if [ -f "$1/BACKEND" ] && [ -f "$1/FRONTEND/webapp" ]; then
+    echo "Static with Python" && exit 0
+else
+    echo "no" && exit 1
+fi
+
