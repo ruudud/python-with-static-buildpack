@@ -3,8 +3,16 @@
 build_dir=$1
 cache_dir=$2
 
+[[ -f "$build_dir/.env" ]] && . "$build_dir/.env"
+
 # fail fast
 set -e
+
+if [ ! -n "$WSGI_MODULE" ]; then
+    echo "ERROR: You need to set WSGI_MODULE in .env"
+    exit 1;
+fi
+
 
 echo "-----> Installing nginx and Python stuff with apt-get"
 
@@ -20,6 +28,23 @@ echo "-----> Installing Python dependencies using Pip"
 /usr/local/bin/pip install -r $build_dir/BACKEND/requirements.txt
 
 echo "       Dependencies installed"
+
+echo "-----> Adding Python Upstart job"
+
+cat > /etc/init/backend.conf <<STUFF
+#!upstart
+description "Python backend"
+
+start on startup
+stop on shutdown
+
+respawn
+respawn limit 10 300
+
+chdir /app/BACKEND
+exec /usr/local/bin/gunicorn -b 0.0.0.0:6000 $WSGI_MODULE
+
+STUFF
 
 echo "-----> Adding Nginx config"
 
