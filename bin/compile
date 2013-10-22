@@ -39,12 +39,12 @@ cd /app/BACKEND
 /usr/local/bin/gunicorn -b 0.0.0.0:6000 $WSGI_MODULE
 
 STUFF
+chmod u+x $build_dir/.start.sh
 
 echo "-----> Adding Nginx config"
 
 cat > $build_dir/.nginx.conf <<STUFF
-daemon off;
-error_log stderr;
+error_log /app/error.log;
 worker_processes 1;
 
 events {
@@ -53,7 +53,7 @@ events {
 http {
     include /etc/nginx/mime.types;
     default_type application/octet-stream;
-    access_log /dev/stdout;
+    access_log /app/access.log;
 
     server {
         listen 5000;
