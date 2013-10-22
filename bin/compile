@@ -17,7 +17,7 @@ echo "       Nginx and Python packages installed"
 
 echo "-----> Installing Python dependencies using Pip"
 
-pip install -r $build_dir/BACKEND/requirements.txt
+/usr/local/bin/pip install -r $build_dir/BACKEND/requirements.txt
 
 echo "       Dependencies installed"
 
