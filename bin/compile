@@ -36,6 +36,8 @@ echo "-----> Adding backend startup script"
 cat > $build_dir/.start.sh <<STUFF
 #!/usr/bin/env bash
 cd /app/BACKEND
+/usr/bin/python manage.py syncdb --noinput
+/usr/bin/python manage.py migrate
 /usr/local/bin/gunicorn -b 0.0.0.0:6000 $WSGI_MODULE
 
 STUFF
