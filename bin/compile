@@ -29,20 +29,14 @@ echo "-----> Installing Python dependencies using Pip"
 
 echo "       Dependencies installed"
 
-echo "-----> Adding Python Upstart job"
+echo "-----> Adding backend startup script"
 
-cat > /etc/init/backend.conf <<STUFF
-#!upstart
-description "Python backend"
+# Upstart is not supported until Docker v0.7 :-/
 
-start on startup
-stop on shutdown
-
-respawn
-respawn limit 10 300
-
-chdir /app/BACKEND
-exec /usr/local/bin/gunicorn -b 0.0.0.0:6000 $WSGI_MODULE
+cat > $build_dir/.start.sh <<STUFF
+#!/usr/bin/env bash
+cd /app/BACKEND
+/usr/local/bin/gunicorn -b 0.0.0.0:6000 $WSGI_MODULE
 
 STUFF
 
